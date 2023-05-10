@@ -1,4 +1,5 @@
 const ClothingItem = require("../models/clothingitem");
+const error = require("../utils/errors");
 
 const createItem = (req, res) => {
   console.log(req);
@@ -46,4 +47,33 @@ const deleteItem = (req, res) => {
     });
 };
 
-module.exports = { createItem, getItems, updateItem, deleteItem };
+const likeItem = (req, res, next) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
+    .then(() => {
+      res.send({ message: "Item liked" });
+    })
+    .catch((err) => next(err));
+
+const dislikeItem = (req, res, next) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
+    .then(() => {
+      res.send({ message: "Item disliked" });
+    })
+    .catch((err) => next(err));
+
+module.exports = {
+  createItem,
+  getItems,
+  updateItem,
+  deleteItem,
+  likeItem,
+  dislikeItem,
+};
