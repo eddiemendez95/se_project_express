@@ -2,26 +2,32 @@ const ClothingItem = require("../models/clothingitem");
 const error = require("../utils/errors");
 
 const createItem = (req, res) => {
-  console.log(req);
-  console.log(req.body);
-
   const { name, weather, imageUrl } = req.body;
-  ClothingItem.create({ name, weather, imageUrl })
+  const owner = req.user._id;
+  if (!name || !weather || !imageUrl) {
+    const err = new Error("Please fill out the remaining fields");
+    err.status = error.BAD_REQUEST;
+    err.name = "BadRequest";
+    throw err;
+  }
+  ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
       console.log(item);
       res.send({ data: item });
     })
-    .catch((e) => {
-      res.status(500).send({ message: "Error from createItem", e });
-    });
+    .catch((err) => next(err));
 };
 
 const getItems = (req, res) => {
   ClothingItem.find({})
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
     .then((items) => res.status(200).send(items))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from getItems", e });
-    });
+    .catch((err) => next(err));
 };
 
 const updateItem = (req, res) => {
@@ -29,22 +35,30 @@ const updateItem = (req, res) => {
   const { imageUrl } = req.body;
 
   ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
     .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from updateItem", e });
-    });
+    .catch((err) => next(err));
 };
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then((item) => res.status(204).send({}))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from deleteItem", e });
-    });
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
+    .then((item) => {
+      res.send({ data: item, message: "Item removed" });
+    })
+    .catch((err) => next(err));
 };
 
 const likeItem = (req, res, next) =>
@@ -53,6 +67,12 @@ const likeItem = (req, res, next) =>
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
     .then(() => {
       res.send({ message: "Item liked" });
     })
@@ -64,6 +84,12 @@ const dislikeItem = (req, res, next) =>
     { $pull: { likes: req.user._id } },
     { new: true }
   )
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
     .then(() => {
       res.send({ message: "Item disliked" });
     })

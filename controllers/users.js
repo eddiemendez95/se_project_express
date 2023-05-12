@@ -3,21 +3,28 @@ const error = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
+    .orFail(() => {
+      const err = new Error("User not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
     .then((users) => res.send(users))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from getUsers", e });
-    });
+    .catch((err) => next(err));
 };
 
 const getUser = (req, res) => {
   const { userId } = req.params;
 
-  User.findbyId(userId)
-    .orFail()
+  User.findById(userId)
+    .orFail(() => {
+      const err = new Error("User not found");
+      err.status = error.NOT_FOUND;
+      err.name = "NotFound";
+      throw err;
+    })
     .then((user) => res.send({ data: user }))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from getUser", e });
-    });
+    .catch((err) => next(err));
 };
 
 const createUser = (req, res) => {
@@ -25,9 +32,7 @@ const createUser = (req, res) => {
 
   User.create({ name, avatar })
     .then((user) => res.send({ data: user }))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from createUser", e });
-    });
+    .catch((err) => next(err));
 };
 
 module.exports = { getUser, getUsers, createUser };
