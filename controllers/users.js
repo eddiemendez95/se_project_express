@@ -1,30 +1,34 @@
 const User = require("../models/user");
-const error = require("../utils/errors");
+const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
-    .orFail(() => {
-      const err = new Error("User not found");
-      err.status = error.NOT_FOUND;
-      err.name = "NotFound";
-      throw err;
-    })
+    .orFail()
     .then((users) => res.send(users))
-    .catch((err) => next(err));
+    .catch(() => {
+      res
+        .status(BAD_REQUEST)
+        .send({ message: "An error has occurred on the server" });
+    });
 };
 
 const getUser = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
-    .orFail(() => {
-      const err = new Error("User not found");
-      err.status = error.NOT_FOUND;
-      err.name = "NotFound";
-      throw err;
-    })
+    .orFail()
     .then((user) => res.send({ data: user }))
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err.name === "ValidationError" || err.name === "CastError") {
+        res.status(BAD_REQUEST).send({ message: "The id entered is invalid" });
+      } else if (err.name === "NotFoundError") {
+        res.status(NOT_FOUND).send({ message: "The id entered was not found" });
+      } else {
+        res
+          .status(SERVER_ERROR)
+          .send({ message: "An error has occurred on the server" });
+      }
+    });
 };
 
 const createUser = (req, res) => {
@@ -32,7 +36,15 @@ const createUser = (req, res) => {
 
   User.create({ name, avatar })
     .then((user) => res.send({ data: user }))
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err.name === "ValidationError" || err.name === "CastError") {
+        res.status(NOT_FOUND).send({ message: "The data entered is invalid" });
+      } else {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: "An error has occurred on the server" });
+      }
+    });
 };
 
 module.exports = { getUser, getUsers, createUser };
