@@ -16,7 +16,11 @@ const getUser = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {

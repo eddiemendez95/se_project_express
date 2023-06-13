@@ -37,7 +37,11 @@ const updateItem = (req, res) => {
   const { imageUrl } = req.body;
 
   ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
@@ -58,7 +62,11 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then((item) => {
       res.send({ data: item, message: "Item removed" });
     })
@@ -105,7 +113,11 @@ const dislikeItem = (req, res, next) =>
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then(() => {
       res.send({ message: "Item disliked" });
     })

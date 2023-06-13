@@ -2,6 +2,7 @@ const router = require("express").Router();
 const user = require("../models/user");
 const clothingItem = require("./clothingitem");
 const users = require("./users");
+const NOT_FOUND = require("../utils/errors");
 
 router.use("/items", clothingItem);
 router.use("/users", users);
