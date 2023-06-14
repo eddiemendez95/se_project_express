@@ -73,7 +73,7 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: "The id entered is invalid" });
-      } else if (err.name === "NotFoundError") {
+      } else if (err.name === NOT_FOUND) {
         res
           .status(BAD_REQUEST)
           .send({ message: "The id entered was not found" });
