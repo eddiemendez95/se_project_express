@@ -46,10 +46,8 @@ const updateItem = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: "The id entered is invalid" });
-      } else if (err.name === "NotFoundError") {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: "The id entered was not found" });
+      } else if (err.statusCode === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: "The id entered was not found" });
       } else {
         res
           .status(SERVER_ERROR)
@@ -73,10 +71,8 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: "The id entered is invalid" });
-      } else if (err.name === NOT_FOUND) {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: "The id entered was not found" });
+      } else if (err.statusCode === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: "The id entered was not found" });
       } else {
         res
           .status(SERVER_ERROR)
@@ -91,7 +87,11 @@ const likeItem = (req, res, next) =>
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then(() => {
       res.send({ message: "Item liked" });
     })
@@ -100,6 +100,8 @@ const likeItem = (req, res, next) =>
         res
           .status(BAD_REQUEST)
           .send({ message: "The data provided is invalid" });
+      } else if (err.statusCode === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: "The id entered was not found" });
       } else {
         res
           .status(SERVER_ERROR)
@@ -126,6 +128,8 @@ const dislikeItem = (req, res, next) =>
         res
           .status(BAD_REQUEST)
           .send({ message: "The data provided is invalid" });
+      } else if (err.statusCode === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: "The id entered was not found" });
       } else {
         res
           .status(SERVER_ERROR)
