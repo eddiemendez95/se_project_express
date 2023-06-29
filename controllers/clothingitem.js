@@ -1,5 +1,10 @@
 const ClothingItem = require("../models/clothingitem");
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -59,14 +64,21 @@ const updateItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND;
       throw error;
     })
     .then((item) => {
-      res.send({ data: item, message: "Item removed" });
+      if (String(item.req.user._id) !== req.user._id) {
+        return res.status(FORBIDDEN).send({
+          message: "You do not have the permission to delete this item",
+        });
+      }
+      return item
+        .deleteOne()
+        .then(() => res.send({ data: item, message: "Item removed" }));
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {

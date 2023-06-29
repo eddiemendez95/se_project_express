@@ -8,7 +8,7 @@ const {
   dislikeItem,
 } = require("../controllers/clothingitem");
 
-router.post("/", createItem);
+router.post("/", auth, createItem);
 router.get("/", getItems);
 router.delete("/:itemId", deleteItem);
 router.put("/:itemId/likes", likeItem);

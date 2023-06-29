@@ -5,6 +5,7 @@ const {
   NOT_FOUND,
   SERVER_ERROR,
   UNAUTHORIZED,
+  CONFLICT_ERROR,
 } = require("../utils/errors");
 const JWT_SECRET = require("../utils/config");
 
@@ -14,7 +15,7 @@ const getUsers = (req, res) => {
     .then((users) => res.send(users))
     .catch(() => {
       res
-        .status(BAD_REQUEST)
+        .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -52,14 +53,16 @@ const createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
-        res.status(NOT_FOUND).send({ message: "The data entered is invalid" });
-      } else if (err.code === 11000) {
         res
           .status(BAD_REQUEST)
+          .send({ message: "The data entered is invalid" });
+      } else if (err.code === 11000) {
+        res
+          .status(CONFLICT_ERROR)
           .send({ message: "A user with this email already exists" });
       } else {
         res
-          .status(BAD_REQUEST)
+          .status(SERVER_ERROR)
           .send({ message: "An error has occurred on the server" });
       }
     });
@@ -81,7 +84,7 @@ const login = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  User.findById(userId)
+  User.findById(req.user_id)
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND;
