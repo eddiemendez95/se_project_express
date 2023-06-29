@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { PORT = 3001 } = process.env;
 const app = express();
 const validator = require("./middleware/validation");
+const cors = require("cors");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -17,6 +18,8 @@ app.use((req, res, next) => {
 });
 app.use(routes);
 app.use(validator);
+
+app.use(cors());
 
 app.listen(PORT, () => {
   console.log(`App listening at port ${PORT}`);

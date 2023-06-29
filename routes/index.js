@@ -6,6 +6,8 @@ const error = require("../utils/errors");
 
 router.use("/items", clothingItem);
 router.use("/users", users);
+router.post("/signin", login);
+router.post("/signup", createUser);
 
 router.use((req, res) => {
   res
