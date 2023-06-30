@@ -93,7 +93,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res, next) =>
+const likeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
@@ -121,7 +121,7 @@ const likeItem = (req, res, next) =>
       }
     });
 
-const dislikeItem = (req, res, next) =>
+const dislikeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
