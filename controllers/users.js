@@ -46,11 +46,10 @@ const getUser = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar, email, password });
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send({ name, avatar, email, _id: user._id }))
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         res
@@ -84,7 +83,7 @@ const login = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  User.findById(req.user_id)
+  User.findById(req.user._id)
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND;
@@ -95,7 +94,7 @@ const getCurrentUser = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(BAD_REQUEST).send({ message: "The id entered is invalid" });
-      } else if (err.name === "NotFoundError") {
+      } else if (err.name === NOT_FOUND) {
         res.status(NOT_FOUND).send({ message: "The id entered was not found" });
       } else {
         res

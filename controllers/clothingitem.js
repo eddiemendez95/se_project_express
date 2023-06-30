@@ -71,7 +71,7 @@ const deleteItem = (req, res) => {
       throw error;
     })
     .then((item) => {
-      if (String(item.req.user._id) !== req.user._id) {
+      if (String(item.owner) !== req.user._id) {
         return res.status(FORBIDDEN).send({
           message: "You do not have the permission to delete this item",
         });

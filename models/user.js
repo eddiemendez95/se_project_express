@@ -20,24 +20,24 @@ const user = new mongoose.Schema({
       default:
         "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/wtwr-project/Elise.png",
     },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      validate(value) {
-        return validator.isEmail(value);
-      },
-      message: "You must enter a valid email",
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate(value) {
+      return validator.isEmail(value);
     },
-    password: {
-      type: String,
-      required: true,
-      select: false,
-      validate(value) {
-        return validator.isStrongPassowrd(value);
-      },
-      message: "The password entered is not strong enough",
+    message: "You must enter a valid email",
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
+    validate(value) {
+      return validator.isStrongPassowrd(value);
     },
+    message: "The password entered is not strong enough",
   },
 });
 
