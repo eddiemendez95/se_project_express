@@ -104,8 +104,8 @@ const likeItem = (req, res) =>
       error.statusCode = NOT_FOUND;
       throw error;
     })
-    .then(() => {
-      res.send({ message: "Item liked" });
+    .then((card) => {
+      res.send(card);
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
@@ -132,8 +132,8 @@ const dislikeItem = (req, res) =>
       error.statusCode = NOT_FOUND;
       throw error;
     })
-    .then(() => {
-      res.send({ message: "Item disliked" });
+    .then((card) => {
+      res.send(card);
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
