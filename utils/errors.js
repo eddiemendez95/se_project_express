@@ -37,6 +37,6 @@ module.exports = {
   BadRequestError,
   UnauthorizedError,
   ForbiddenError,
-  NotFoundError
-  ConflictError
+  NotFoundError,
+  ConflictError,
 };

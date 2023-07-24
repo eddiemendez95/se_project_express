@@ -13,3 +13,7 @@ The techonologies used include Express.js, Node.js, MongoDB and Postman.
 `npm run start` — to launch the server
 
 `npm run dev` — to launch the server with the hot reload feature
+
+# Project Domain Name
+
+Main Website www.what2wear.moo.com || what2wear.mooo.com

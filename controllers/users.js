@@ -33,7 +33,7 @@ const createUser = (req, res, next) => {
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
-    .then((user) => res.send({ name, avatar, email, _id: user._id }))
+    .then((user) => res.send({ name, avatar, email, _id: user.id }))
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         next(new BadRequestError("The data entered is invalid"));
@@ -49,7 +49,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user.id }, JWT_SECRET, {
         expiresIn: "7d",
       });
       res.send({ token });
@@ -58,7 +58,7 @@ const login = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
+  User.findById(req.user.id)
     .orFail(() => {
       throw new NotFoundError("Item ID not found");
     })
@@ -69,7 +69,7 @@ const getCurrentUser = (req, res, next) => {
 const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(
-    req.user._id,
+    req.user.id,
     { name, avatar },
     { new: true, runValidators: true }
   )

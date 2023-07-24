@@ -7,7 +7,7 @@ const {
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user._id;
+  const owner = req.user.id;
   ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
       res.send({ data: item });
@@ -47,7 +47,7 @@ const deleteItem = (req, res, next) => {
       throw new NotFoundError("Item ID not found");
     })
     .then((item) => {
-      if (String(item.owner) !== req.user._id) {
+      if (String(item.owner) !== req.user.id) {
         return new ForbiddenError(
           "You do not have the permission to delete this item"
         );
@@ -62,7 +62,7 @@ const deleteItem = (req, res, next) => {
 const likeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user.id } },
     { new: true }
   )
     .orFail(() => {
@@ -76,7 +76,7 @@ const likeItem = (req, res, next) =>
 const dislikeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user.id } },
     { new: true }
   )
     .orFail(() => {

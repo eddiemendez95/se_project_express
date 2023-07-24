@@ -11,7 +11,6 @@ const validateURL = (value, helpers) => {
 const validateEmail = (value, helpers) => {
   if (validator.isEmail(value)) {
     return value;
-    S;
   }
   return helpers.error("string.email");
 };
