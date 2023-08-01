@@ -7,24 +7,6 @@ const NotFoundError = require("../errors/NotFound");
 const ConflictError = require("../errors/Conflict");
 const JWT_SECRET = require("../utils/config");
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .orFail()
-    .then((users) => res.send(users))
-    .catch(next);
-};
-
-const getUser = (req, res, next) => {
-  const { userId } = req.params;
-
-  User.findById(userId)
-    .orFail(() => {
-      throw new NotFoundError("Item ID not found");
-    })
-    .then((user) => res.send({ data: user }))
-    .catch(next);
-};
-
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
@@ -56,7 +38,7 @@ const login = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user.id)
+  User.findById(req.user._id)
     .orFail(() => {
       throw new NotFoundError("Item ID not found");
     })
@@ -67,7 +49,7 @@ const getCurrentUser = (req, res, next) => {
 const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(
-    req.user.id,
+    req.user._id,
     { name, avatar },
     { new: true, runValidators: true }
   )
@@ -85,8 +67,6 @@ const updateProfile = (req, res, next) => {
 };
 
 module.exports = {
-  getUser,
-  getUsers,
   createUser,
   login,
   getCurrentUser,

@@ -21,9 +21,9 @@ app.get("/crash-test", () => {
     throw new Error("Server will crash now");
   }, 0);
 });
+app.use(requestLogger);
 app.use(routes);
 app.use(errorLogger);
-app.use(requestLogger);
 app.use(errors());
 app.use(errorHandler);
 

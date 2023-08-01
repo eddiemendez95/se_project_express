@@ -5,7 +5,7 @@ const ForbiddenError = require("../errors/Forbidden");
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user.id;
+  const owner = req.user._id;
   ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
       res.send({ data: item });
@@ -25,18 +25,6 @@ const getItems = (req, res, next) => {
     .catch(next);
 };
 
-const updateItem = (req, res, next) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail(() => {
-      throw new NotFoundError("Item ID not found");
-    })
-    .then((item) => res.status(200).send({ data: item }))
-    .catch(next);
-};
-
 const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
@@ -45,8 +33,8 @@ const deleteItem = (req, res, next) => {
       throw new NotFoundError("Item ID not found");
     })
     .then((item) => {
-      if (String(item.owner) !== req.user.id) {
-        return new ForbiddenError(
+      if (String(item.owner) !== req.user._id) {
+        throw new ForbiddenError(
           "You do not have the permission to delete this item"
         );
       }
@@ -60,7 +48,7 @@ const deleteItem = (req, res, next) => {
 const likeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user.id } },
+    { $addToSet: { likes: req.user._id } },
     { new: true }
   )
     .orFail(() => {
@@ -74,7 +62,7 @@ const likeItem = (req, res, next) =>
 const dislikeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user.id } },
+    { $pull: { likes: req.user._id } },
     { new: true }
   )
     .orFail(() => {
@@ -88,7 +76,6 @@ const dislikeItem = (req, res, next) =>
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeItem,
   dislikeItem,
